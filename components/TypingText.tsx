@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 interface TypingTextProps {
   text: string;
@@ -16,7 +16,7 @@ export default function TypingText({ text, speed = 30, className = '', delay = 0
   const [hasStarted, setHasStarted] = useState(false);
 
   // Calculate variable typing speed for more realistic effect
-  const getTypingSpeed = (char: string, index: number) => {
+  const getTypingSpeed = useCallback((char: string, index: number) => {
     // Pause longer at punctuation
     if (char === '.' || char === '!' || char === '?') {
       return speed * 8; // Longer pause at sentence end
@@ -31,7 +31,7 @@ export default function TypingText({ text, speed = 30, className = '', delay = 0
     const baseSpeed = speed;
     const variation = Math.random() * 0.4 + 0.8; // 80-120% of base speed
     return baseSpeed * variation;
-  };
+  }, [speed]);
 
   useEffect(() => {
     if (delay > 0 && !hasStarted) {
@@ -54,7 +54,7 @@ export default function TypingText({ text, speed = 30, className = '', delay = 0
     } else if (hasStarted && currentIndex >= text.length) {
       setIsComplete(true);
     }
-  }, [currentIndex, text, speed, delay, hasStarted]);
+  }, [currentIndex, text, delay, hasStarted, getTypingSpeed]);
 
   return (
     <span className={className}>

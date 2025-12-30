@@ -21,10 +21,6 @@ export default function AdminPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchPosts();
-  }, []);
-
-  useEffect(() => {
     const fetchPosts = async () => {
       try {
         const response = await fetch('/api/posts?limit=1000&offset=0');
