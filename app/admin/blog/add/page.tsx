@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import AdminAuthGuard from '@/components/AdminAuthGuard';
 
-export default function AddBlogPage() {
+function AddBlogForm() {
   const router = useRouter();
   const [formData, setFormData] = useState({
     title: '',
@@ -221,3 +222,10 @@ export default function AddBlogPage() {
   );
 }
 
+export default function AddBlogPage() {
+  return (
+    <AdminAuthGuard>
+      <AddBlogForm />
+    </AdminAuthGuard>
+  );
+}

@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { formatDate } from '@/lib/dateUtils';
+import AdminAuthGuard from '@/components/AdminAuthGuard';
 
 interface Post {
   id: string;
@@ -14,7 +16,8 @@ interface Post {
   readTime?: number;
 }
 
-export default function AdminPage() {
+function AdminDashboard() {
+  const router = useRouter();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -91,8 +94,18 @@ export default function AdminPage() {
             </Link>
           </div>
           <p className="text-retro-text text-sm">
-            Manage your blog posts. No authentication required.
+            Manage your blog posts.
           </p>
+          <button
+            onClick={async () => {
+              await fetch('/api/auth/logout', { method: 'POST' });
+              router.push('/admin/login');
+              router.refresh();
+            }}
+            className="mt-2 border border-retro-border px-4 py-2 text-retro-muted hover:bg-retro-text hover:text-retro-bg transition-all text-sm"
+          >
+            LOGOUT
+          </button>
         </div>
 
         {loading && (
@@ -157,6 +170,14 @@ export default function AdminPage() {
         )}
       </div>
     </main>
+  );
+}
+
+export default function AdminPage() {
+  return (
+    <AdminAuthGuard>
+      <AdminDashboard />
+    </AdminAuthGuard>
   );
 }
 

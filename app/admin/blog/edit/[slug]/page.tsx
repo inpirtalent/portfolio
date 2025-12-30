@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams, useParams } from 'next/navigation';
 import Link from 'next/link';
+import AdminAuthGuard from '@/components/AdminAuthGuard';
 
 function EditBlogForm() {
   const router = useRouter();
@@ -273,17 +274,19 @@ function EditBlogForm() {
 
 export default function EditBlogPage() {
   return (
-    <Suspense fallback={
-      <main className="min-h-screen relative p-6 md:p-8">
-        <div className="max-w-4xl mx-auto relative z-10">
-          <div className="text-retro-text text-center py-8">
-            LOADING...
+    <AdminAuthGuard>
+      <Suspense fallback={
+        <main className="min-h-screen relative p-6 md:p-8">
+          <div className="max-w-4xl mx-auto relative z-10">
+            <div className="text-retro-text text-center py-8">
+              LOADING...
+            </div>
           </div>
-        </div>
-      </main>
-    }>
-      <EditBlogForm />
-    </Suspense>
+        </main>
+      }>
+        <EditBlogForm />
+      </Suspense>
+    </AdminAuthGuard>
   );
 }
 
