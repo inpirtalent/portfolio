@@ -46,7 +46,7 @@ export async function GET(request: Request) {
     const offset = Math.max(0, parseInt(offsetParam, 10) || 0); // Ensure non-negative
 
     // Try to fetch records - handle potential table name issues
-    let allRecords: AirtablePost[] = [];
+    let allRecords: readonly AirtablePost[] = [];
     try {
       // Fetch all records (Airtable doesn't support offset in select, so we fetch all and paginate server-side)
       // This is fine for blog posts which typically aren't in the thousands
@@ -55,7 +55,7 @@ export async function GET(request: Request) {
           sort: [{ field: 'Date', direction: 'desc' }],
         });
 
-      allRecords = await query.all() as AirtablePost[];
+      allRecords = await query.all() as unknown as readonly AirtablePost[];
     } catch (tableError) {
       console.error('Airtable table access error:', tableError);
       throw new Error(`Table access failed: ${tableError instanceof Error ? tableError.message : 'Unknown table error'}. Make sure the table name is exactly "Blog Posts" and the token has access.`);
