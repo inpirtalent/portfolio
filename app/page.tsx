@@ -239,8 +239,8 @@ export default function Home() {
       {/* Footer */}
       <footer className="relative z-10 border-t border-retro-border p-6 md:p-8 mt-12">
         <div className="max-w-7xl mx-auto text-center text-retro-text text-sm">
-          <p>&copy; 2024 JULIANO COUTINHO. ALL RIGHTS RESERVED.</p>
-          <p className="mt-2 text-retro-text">BUILT WITH NEXT.JS & TYPESCRIPT</p>
+          <p>&copy; 2026 JULIANO COUTINHO. ALL RIGHTS RESERVED.</p>
+          <p className="mt-2 text-retro-text">BUILT WITH COFFEE & LOVE</p>
         </div>
       </footer>
     </main>
