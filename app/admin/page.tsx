@@ -11,6 +11,7 @@ interface Post {
   date: string;
   category: string;
   excerpt: string;
+  readTime?: number;
 }
 
 export default function AdminPage() {
@@ -23,23 +24,27 @@ export default function AdminPage() {
     fetchPosts();
   }, []);
 
-  const fetchPosts = async () => {
-    try {
-      const response = await fetch('/api/posts');
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.details || data.error || 'Failed to fetch posts');
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const response = await fetch('/api/posts?limit=1000&offset=0');
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.details || data.error || 'Failed to fetch posts');
+        }
+        
+        setPosts(data.posts || []);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load posts');
+        console.error('Error fetching posts:', err);
+      } finally {
+        setLoading(false);
       }
-      
-      setPosts(data.posts || []);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load posts');
-      console.error('Error fetching posts:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+
+    fetchPosts();
+  }, []);
 
   const handleDelete = async (id: string, slug: string) => {
     if (!confirm('Are you sure you want to delete this post?')) {

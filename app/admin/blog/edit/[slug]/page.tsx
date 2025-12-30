@@ -24,44 +24,45 @@ function EditBlogForm() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (slug) {
-      fetchPost();
-    } else {
-      setError('Missing post slug');
-      setIsLoading(false);
-    }
-  }, [slug]);
-
-  const fetchPost = async () => {
-    try {
-      const response = await fetch(`/api/posts/${slug}`);
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.details || data.error || 'Failed to fetch post');
+    const fetchPost = async () => {
+      if (!slug) {
+        setError('Missing post slug');
+        setIsLoading(false);
+        return;
       }
 
-      const post = data.post;
-      
-      // If content is an array, join it with double newlines
-      const contentText = Array.isArray(post.content) 
-        ? post.content.join('\n\n') 
-        : post.content;
+      try {
+        const response = await fetch(`/api/posts/${slug}`);
+        const data = await response.json();
 
-      setFormData({
-        title: post.title,
-        date: post.date.split('T')[0], // Extract date part if it includes time
-        category: post.category,
-        excerpt: post.excerpt,
-        content: contentText,
-      });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load post');
-      console.error('Error fetching post:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+        if (!response.ok) {
+          throw new Error(data.details || data.error || 'Failed to fetch post');
+        }
+
+        const post = data.post;
+        
+        // If content is an array, join it with double newlines
+        const contentText = Array.isArray(post.content) 
+          ? post.content.join('\n\n') 
+          : post.content;
+
+        setFormData({
+          title: post.title,
+          date: post.date.split('T')[0], // Extract date part if it includes time
+          category: post.category,
+          excerpt: post.excerpt,
+          content: contentText,
+        });
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load post');
+        console.error('Error fetching post:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPost();
+  }, [slug]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -84,11 +85,11 @@ function EditBlogForm() {
         },
         body: JSON.stringify({
           recordId,
-          title: formData.title,
+          title: formData.title.trim(),
           date: formData.date,
-          category: formData.category,
-          excerpt: formData.excerpt,
-          content: formData.content,
+          category: formData.category.trim(),
+          excerpt: formData.excerpt.trim(),
+          content: formData.content.trim(),
         }),
       });
 

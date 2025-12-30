@@ -20,10 +20,13 @@ interface AirtablePost {
 }
 
 function generateSlug(title: string): string {
+  if (!title || typeof title !== 'string') {
+    return '';
+  }
   return title
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
+    .replace(/^-|-$/g, '') || 'untitled';
 }
 
 export async function GET(
@@ -126,16 +129,45 @@ export async function PUT(
     const body = await request.json();
     const { title, date, category, excerpt, content, recordId } = body;
 
-    if (!recordId) {
+    if (!recordId || typeof recordId !== 'string') {
       return NextResponse.json(
         { error: 'Record ID is required for update' },
         { status: 400 }
       );
     }
 
-    if (!title || !date || !category || !excerpt || !content) {
+    // Validate required fields
+    if (!title || typeof title !== 'string' || title.trim().length === 0) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Missing required fields', details: 'Title is required and must be a non-empty string' },
+        { status: 400 }
+      );
+    }
+
+    if (!date || typeof date !== 'string' || date.trim().length === 0) {
+      return NextResponse.json(
+        { error: 'Missing required fields', details: 'Date is required' },
+        { status: 400 }
+      );
+    }
+
+    if (!category || typeof category !== 'string' || category.trim().length === 0) {
+      return NextResponse.json(
+        { error: 'Missing required fields', details: 'Category is required' },
+        { status: 400 }
+      );
+    }
+
+    if (!excerpt || typeof excerpt !== 'string' || excerpt.trim().length === 0) {
+      return NextResponse.json(
+        { error: 'Missing required fields', details: 'Excerpt is required' },
+        { status: 400 }
+      );
+    }
+
+    if (!content || typeof content !== 'string' || content.trim().length === 0) {
+      return NextResponse.json(
+        { error: 'Missing required fields', details: 'Content is required' },
         { status: 400 }
       );
     }
@@ -145,11 +177,11 @@ export async function PUT(
       {
         id: recordId,
         fields: {
-          Title: title,
-          Date: date,
-          Category: category,
-          Excerpt: excerpt,
-          Content: content,
+          Title: title.trim(),
+          Date: date.trim(),
+          Category: category.trim(),
+          Excerpt: excerpt.trim(),
+          Content: content.trim(),
         },
       },
     ]);
@@ -207,14 +239,14 @@ export async function DELETE(
     const url = new URL(request.url);
     const recordId = url.searchParams.get('recordId');
 
-    if (!recordId) {
+    if (!recordId || typeof recordId !== 'string' || recordId.trim().length === 0) {
       return NextResponse.json(
         { error: 'Record ID is required for deletion' },
         { status: 400 }
       );
     }
 
-    // Delete record from Airtable
+    // Delete record from Airtable (destroy expects an array)
     await base('Blog Posts').destroy([recordId]);
 
     return NextResponse.json({

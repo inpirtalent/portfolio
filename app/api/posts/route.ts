@@ -20,10 +20,13 @@ interface AirtablePost {
 }
 
 function generateSlug(title: string): string {
+  if (!title || typeof title !== 'string') {
+    return '';
+  }
   return title
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
+    .replace(/^-|-$/g, '') || 'untitled';
 }
 
 export async function GET(request: Request) {
@@ -37,8 +40,10 @@ export async function GET(request: Request) {
 
     // Get query parameters for pagination
     const { searchParams } = new URL(request.url);
-    const limit = parseInt(searchParams.get('limit') || '4', 10);
-    const offset = parseInt(searchParams.get('offset') || '0', 10);
+    const limitParam = searchParams.get('limit') || '4';
+    const offsetParam = searchParams.get('offset') || '0';
+    const limit = Math.max(1, Math.min(100, parseInt(limitParam, 10) || 4)); // Clamp between 1 and 100
+    const offset = Math.max(0, parseInt(offsetParam, 10) || 0); // Ensure non-negative
 
     // Try to fetch records - handle potential table name issues
     let allRecords: AirtablePost[] = [];
@@ -123,9 +128,38 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { title, date, category, excerpt, content } = body;
 
-    if (!title || !date || !category || !excerpt || !content) {
+    // Validate required fields
+    if (!title || typeof title !== 'string' || title.trim().length === 0) {
       return NextResponse.json(
-        { error: 'Missing required fields', details: 'Title, Date, Category, Excerpt, and Content are required' },
+        { error: 'Missing required fields', details: 'Title is required and must be a non-empty string' },
+        { status: 400 }
+      );
+    }
+
+    if (!date || typeof date !== 'string' || date.trim().length === 0) {
+      return NextResponse.json(
+        { error: 'Missing required fields', details: 'Date is required' },
+        { status: 400 }
+      );
+    }
+
+    if (!category || typeof category !== 'string' || category.trim().length === 0) {
+      return NextResponse.json(
+        { error: 'Missing required fields', details: 'Category is required' },
+        { status: 400 }
+      );
+    }
+
+    if (!excerpt || typeof excerpt !== 'string' || excerpt.trim().length === 0) {
+      return NextResponse.json(
+        { error: 'Missing required fields', details: 'Excerpt is required' },
+        { status: 400 }
+      );
+    }
+
+    if (!content || typeof content !== 'string' || content.trim().length === 0) {
+      return NextResponse.json(
+        { error: 'Missing required fields', details: 'Content is required' },
         { status: 400 }
       );
     }
@@ -134,11 +168,11 @@ export async function POST(request: Request) {
     const records = await base('Blog Posts').create([
       {
         fields: {
-          Title: title,
-          Date: date,
-          Category: category,
-          Excerpt: excerpt,
-          Content: content,
+          Title: title.trim(),
+          Date: date.trim(),
+          Category: category.trim(),
+          Excerpt: excerpt.trim(),
+          Content: content.trim(),
         },
       },
     ]);

@@ -30,15 +30,21 @@ export default function Home() {
     async function fetchPosts() {
       try {
         const response = await fetch(`/api/posts?limit=${initialLimit}&offset=0`);
-        const data = await response.json();
         
         if (!response.ok) {
-          throw new Error(data.details || data.error || 'Failed to fetch posts');
+          const errorData = await response.json().catch(() => ({ error: 'Failed to fetch posts' }));
+          throw new Error(errorData.details || errorData.error || 'Failed to fetch posts');
         }
         
-        setPosts(data.posts || []);
+        const data = await response.json();
+        
+        if (!data.posts || !Array.isArray(data.posts)) {
+          throw new Error('Invalid response format');
+        }
+        
+        setPosts(data.posts);
         setHasMore(data.hasMore || false);
-        setOffset(data.offset || data.posts?.length || 0);
+        setOffset(data.offset || data.posts.length);
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load posts';
         setError(errorMessage);
@@ -55,17 +61,24 @@ export default function Home() {
     if (loadingMore || !hasMore) return;
 
     setLoadingMore(true);
+    setError(null); // Clear previous errors
     try {
       const response = await fetch(`/api/posts?limit=${loadMoreLimit}&offset=${offset}`);
-      const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(data.details || data.error || 'Failed to fetch more posts');
+        const errorData = await response.json().catch(() => ({ error: 'Failed to fetch more posts' }));
+        throw new Error(errorData.details || errorData.error || 'Failed to fetch more posts');
       }
       
-      setPosts(prev => [...prev, ...(data.posts || [])]);
+      const data = await response.json();
+      
+      if (!data.posts || !Array.isArray(data.posts)) {
+        throw new Error('Invalid response format');
+      }
+      
+      setPosts(prev => [...prev, ...data.posts]);
       setHasMore(data.hasMore || false);
-      setOffset(data.offset || offset + (data.posts?.length || 0));
+      setOffset(data.offset || offset + data.posts.length);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load more posts';
       setError(errorMessage);
@@ -124,22 +137,22 @@ export default function Home() {
           </h2>
           <div className="text-retro-text text-base md:text-lg leading-relaxed space-y-4">
             <p>
-              I'm a full-stack developer passionate about building modern web applications with Next.js, Node.js, and Ruby on Rails. I transform complex business requirements into elegant, scalable solutions that deliver real value.
+              I&apos;m a full-stack developer passionate about building modern web applications with Next.js, Node.js, and Ruby on Rails. I transform complex business requirements into elegant, scalable solutions that deliver real value.
             </p>
             <p>
-              On the frontend, I craft intuitive user experiences using React, Next.js, and modern CSS frameworks. I'm skilled in creating responsive, performant interfaces that work seamlessly across all devices.
+              On the frontend, I craft intuitive user experiences using React, Next.js, and modern CSS frameworks. I&apos;m skilled in creating responsive, performant interfaces that work seamlessly across all devices.
             </p>
             <p>
-              For backend development, I leverage Node.js and Ruby on Rails to build robust APIs, handle database operations, and implement secure authentication systems. I'm experienced with PostgreSQL, MongoDB, and RESTful architecture.
+              For backend development, I leverage Node.js and Ruby on Rails to build robust APIs, handle database operations, and implement secure authentication systems. I&apos;m experienced with PostgreSQL, MongoDB, and RESTful architecture.
             </p>
             <p>
-              Beyond traditional development, I specialize in marketing automation and workflow optimization. Using Airtable and Make.com, I've automated complex business processes, reducing manual work by up to 80% and increasing operational efficiency.
+              Beyond traditional development, I specialize in marketing automation and workflow optimization. Using Airtable and Make.com, I&apos;ve automated complex business processes, reducing manual work by up to 80% and increasing operational efficiency.
             </p>
             <p>
               My marketing expertise includes developing data-driven strategies, running successful campaigns, and analyzing performance metrics. I bridge the gap between technical implementation and business objectives.
             </p>
             <p>
-              I'm always exploring new technologies and methodologies to stay at the forefront of web development. Whether it's implementing the latest Next.js features, optimizing database queries, or creating seamless automation workflows, I'm driven by the challenge of solving complex problems.
+              I&apos;m always exploring new technologies and methodologies to stay at the forefront of web development. Whether it&apos;s implementing the latest Next.js features, optimizing database queries, or creating seamless automation workflows, I&apos;m driven by the challenge of solving complex problems.
             </p>
           </div>
         </div>

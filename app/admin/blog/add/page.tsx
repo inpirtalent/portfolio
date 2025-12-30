@@ -39,11 +39,11 @@ export default function AddBlogPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          title: formData.title,
+          title: formData.title.trim(),
           date: formData.date,
-          category: formData.category,
-          excerpt: formData.excerpt,
-          content: formData.content,
+          category: formData.category.trim(),
+          excerpt: formData.excerpt.trim(),
+          content: formData.content.trim(),
         }),
       });
 
