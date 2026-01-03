@@ -106,6 +106,7 @@ export default function Home() {
       'TypeScript',
       'Next.js',
       'React',
+      'Angular',
       'Node.js',
       'Ruby on Rails',
       'PostgreSQL',
@@ -274,7 +275,7 @@ export default function Home() {
             />
             <SkillsSection
               title="Frameworks & Libraries"
-              items={['Next.js', 'React', 'Node.js', 'Ruby on Rails', 'Express.js', 'Tailwind CSS']}
+              items={['Next.js', 'React', 'Angular', 'Node.js', 'Ruby on Rails', 'Express.js', 'Tailwind CSS']}
               color="cyan"
             />
             <SkillsSection
