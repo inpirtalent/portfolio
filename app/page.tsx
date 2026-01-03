@@ -5,6 +5,7 @@ import TypingEffect from '@/components/TypingEffect';
 import MouseTracker from '@/components/MouseTracker';
 import BlogPost from '@/components/BlogPost';
 import SkillsSection from '@/components/SkillsSection';
+import StructuredData from '@/components/StructuredData';
 
 interface Post {
   id: string;
@@ -88,24 +89,70 @@ export default function Home() {
     }
   };
 
+  const siteUrl = typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_SITE_URL || 'https://julianocoutinho.dev';
+
+  const personStructuredData = {
+    name: 'Juliano Coutinho',
+    url: siteUrl,
+    jobTitle: 'Full-Stack Developer | Marketing Specialist | Automation Engineer',
+    description: 'Full-stack developer passionate about building modern web applications with Next.js, Node.js, and Ruby on Rails. Specializes in marketing automation and workflow optimization.',
+    email: 'coutinhojuliano23@gmail.com',
+    sameAs: [
+      'https://linkedin.com/in/juliano-coutinhos',
+      'https://github.com/inpirtalent',
+    ],
+    knowsAbout: [
+      'JavaScript',
+      'TypeScript',
+      'Next.js',
+      'React',
+      'Node.js',
+      'Ruby on Rails',
+      'PostgreSQL',
+      'MongoDB',
+      'Marketing Automation',
+      'Make.com',
+      'Airtable',
+      'Web Development',
+      'Full-Stack Development',
+    ],
+    alumniOf: {
+      '@type': 'Organization',
+      name: 'Developer',
+    },
+  };
+
+  const websiteStructuredData = {
+    name: 'Juliano Coutinho - Portfolio',
+    url: siteUrl,
+    description: 'Full-stack developer specializing in Next.js, Node.js, Ruby on Rails, and marketing automation.',
+    publisher: {
+      '@type': 'Person',
+      name: 'Juliano Coutinho',
+    },
+  };
+
   return (
     <main className="min-h-screen relative scan-line">
+      <StructuredData type="Person" data={personStructuredData} />
+      <StructuredData type="WebSite" data={websiteStructuredData} />
       <TypingEffect />
       <MouseTracker />
       
       {/* Header */}
-      <header className="relative z-10 border-b border-retro-border p-6 md:p-8">
+      <header className="relative z-10 border-b border-retro-border p-6 md:p-8" itemScope itemType="https://schema.org/Person">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl md:text-5xl lg:text-6xl text-retro-text text-shadow-retro mb-4" style={{ fontFamily: "'Press Start 2P', monospace" }}>
+          <h1 className="text-3xl md:text-5xl lg:text-6xl text-retro-text text-shadow-retro mb-4" style={{ fontFamily: "'Press Start 2P', monospace" }} itemProp="name">
             JULIANO COUTINHO
           </h1>
-          <p className="text-retro-text text-lg md:text-xl mb-4">
+          <p className="text-retro-text text-lg md:text-xl mb-4" itemProp="jobTitle">
             &gt; Full-Stack Developer | Marketing Specialist | Automation Engineer
           </p>
           <div className="flex flex-wrap gap-4 text-sm md:text-base">
             <a
               href="mailto:coutinhojuliano23@gmail.com"
               className="text-retro-text hover:text-retro-text border border-retro-border px-4 py-2 hover:glow-retro transition-all"
+              itemProp="email"
             >
               EMAIL
             </a>
@@ -135,7 +182,7 @@ export default function Home() {
           <h2 className="text-3xl md:text-4xl text-retro-text mb-4 text-shadow-retro">
             &gt; ABOUT
           </h2>
-          <div className="text-retro-text text-base md:text-lg leading-relaxed space-y-4">
+          <div className="text-retro-text text-xl md:text-2xl leading-relaxed space-y-4">
             <p>
               I&apos;m a full-stack developer passionate about building modern web applications with Next.js, Node.js, and Ruby on Rails. I transform complex business requirements into elegant, scalable solutions that deliver real value.
             </p>
@@ -242,8 +289,8 @@ export default function Home() {
             />
             <SkillsSection
               title="Marketing & Analytics"
-              items={['Google Analytics', 'SEO', 'Content Marketing', 'A/B Testing', 'Campaign Management']}
-              color="orange"
+              items={['Google Analytics', 'SEO', 'HubSpot', 'Salesforce', 'Data visualization', 'A/B Testing', 'Campaign Management']}
+              color="magenta"
             />
           </div>
         </div>

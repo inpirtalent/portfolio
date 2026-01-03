@@ -1,7 +1,9 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { Metadata } from 'next';
 import Airtable from 'airtable';
 import { formatDate } from '@/lib/dateUtils';
+import StructuredData from '@/components/StructuredData';
 
 // Initialize Airtable
 const base = new Airtable({
@@ -42,6 +44,8 @@ interface Post {
   summary: string;
   readTime: number;
 }
+
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://julianocoutinho.dev';
 
 async function getPost(slug: string): Promise<Post | null> {
   try {
@@ -90,6 +94,56 @@ async function getPost(slug: string): Promise<Post | null> {
     return null;
   }
 }
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const writing = await getPost(slug);
+
+  if (!writing) {
+    return {
+      title: 'Post Not Found',
+    };
+  }
+
+  const url = `${siteUrl}/writings/${slug}`;
+  const description = writing.excerpt || writing.summary || `Read ${writing.title} by Juliano Coutinho`;
+
+  return {
+    title: writing.title,
+    description: description,
+    keywords: [writing.category, 'blog', 'article', 'web development', 'technology', writing.title],
+    authors: [{ name: 'Juliano Coutinho' }],
+    openGraph: {
+      title: writing.title,
+      description: description,
+      url: url,
+      siteName: 'Juliano Coutinho - Portfolio',
+      locale: 'en_US',
+      type: 'article',
+      publishedTime: writing.date,
+      authors: ['Juliano Coutinho'],
+      tags: [writing.category],
+      images: [
+        {
+          url: `${siteUrl}/og-image.png`,
+          width: 1200,
+          height: 630,
+          alt: writing.title,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: writing.title,
+      description: description,
+      creator: '@julianocoutinho',
+      images: [`${siteUrl}/og-image.png`],
+    },
+    alternates: {
+      canonical: url,
+    },
+  };
+}
+
 export default async function WritingPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const writing = await getPost(slug);
@@ -98,8 +152,36 @@ export default async function WritingPage({ params }: { params: Promise<{ slug: 
     notFound();
   }
 
+  const url = `${siteUrl}/writings/${slug}`;
+
+  const blogPostStructuredData = {
+    '@type': 'BlogPosting',
+    headline: writing.title,
+    description: writing.excerpt || writing.summary,
+    image: `${siteUrl}/og-image.png`,
+    datePublished: writing.date,
+    dateModified: writing.date,
+    author: {
+      '@type': 'Person',
+      name: 'Juliano Coutinho',
+      url: siteUrl,
+    },
+    publisher: {
+      '@type': 'Person',
+      name: 'Juliano Coutinho',
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': url,
+    },
+    keywords: writing.category,
+    articleSection: writing.category,
+    wordCount: writing.content.join(' ').split(/\s+/).length,
+  };
+
   return (
     <main className="min-h-screen relative">
+      <StructuredData type="BlogPosting" data={blogPostStructuredData} />
       <div className="max-w-4xl mx-auto p-6 md:p-8 relative z-10">
         <Link 
           href="/"
@@ -108,19 +190,21 @@ export default async function WritingPage({ params }: { params: Promise<{ slug: 
           &lt; BACK
         </Link>
         
-        <article className="border border-retro-border p-8 md:p-12 bg-retro-bg/50 backdrop-blur-sm">
+        <article className="border border-retro-border p-8 md:p-12 bg-retro-bg/50 backdrop-blur-sm" itemScope itemType="https://schema.org/BlogPosting">
           <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
-            <span className="border border-retro-accent px-3 py-1 text-xs text-retro-accent">
+            <span className="border border-retro-accent px-3 py-1 text-xs text-retro-accent" itemProp="articleSection">
               {writing.category}
             </span>
-            <time className="text-retro-text text-sm font-mono">{formatDate(writing.date)}</time>
+            <time className="text-retro-text text-sm font-mono" dateTime={writing.date} itemProp="datePublished">
+              {formatDate(writing.date)}
+            </time>
           </div>
           
-          <h1 className="text-3xl md:text-4xl lg:text-5xl text-retro-text mb-8 text-shadow-retro">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl text-retro-text mb-8 text-shadow-retro" itemProp="headline">
             {writing.title}
           </h1>
           
-          <div className="text-retro-text text-base md:text-lg leading-relaxed space-y-6">
+          <div className="text-retro-text text-xl md:text-2xl leading-relaxed space-y-6" itemProp="articleBody">
             {writing.content.map((paragraph: string, index: number) => (
               <p key={index}>{paragraph}</p>
             ))}
